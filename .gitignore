@@ -3,4 +3,7 @@
 build/
 
 # Emacs
+.classpath
+.project
+.settings/
 .meghanada/
