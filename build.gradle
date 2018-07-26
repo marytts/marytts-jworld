@@ -1,0 +1,65 @@
+/*******************************************************************************************
+ ** Dependencies and meta setup
+ *******************************************************************************************/
+
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    jcenter()
+    maven {
+        url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
+    }
+}
+
+dependencies {
+    testCompile group:"'org.testng", name: "testng", version: "6.8.8"
+}
+
+test {
+    useTestNG()
+}
+
+/*******************************************************************************************
+ **
+ *******************************************************************************************/
+
+
+
+/**********************************************************************************************
+ ** Project meta + publishing part
+ ***********************************************************************************************/
+version '0.1-SNAPSHOT'
+group "de.dfki.mary"
+description "Artifact containing the world module module MaryTTS"
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourceJar {
+                classifier 'sources'
+            }
+        }
+    }
+    repositories {
+        maven {
+            url "$rootProject.buildDir/repo"
+        }
+        maven {
+            url version.endsWith('-SNAPSHOT') ? 'https://oss.jfrog.org/artifactory/oss-snapshot-local' : ''
+            credentials {
+                username = findProperty('bintrayUser')
+                password = findProperty('bintrayApiKey')
+            }
+        }
+    }
+}
