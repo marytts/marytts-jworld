@@ -1,11 +1,17 @@
 package marytts.jworld;
 
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+
 import com.google.common.io.ByteStreams;
 
+import org.junit.Assert;
 import org.testng.annotations.Test;
 
 import cern.colt.matrix.impl.DenseDoubleMatrix1D;
@@ -13,6 +19,7 @@ import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 import marytts.data.Sequence;
 import marytts.data.SupportedSequenceType;
 import marytts.data.Utterance;
+import marytts.data.item.acoustic.AudioItem;
 import marytts.data.item.acoustic.F0List;
 import marytts.data.item.global.DoubleMatrixItem;
 import marytts.jworld.data.JWorldSupportedSequenceType;
@@ -22,9 +29,6 @@ public class JWorldTest {
     @Test
     public void testJWorldProcess() throws Exception {
         Utterance utt = new Utterance();
-        // FIXME: Load some resources (not added to the repo for space, they should be produced by analysis first!!)
-
-        //  - F0
 
         // Load reference F0
         byte[] bytes = ByteStreams.toByteArray(JWorldTest.class.getResourceAsStream("/test.f0"));
@@ -85,8 +89,36 @@ public class JWorldTest {
 
         // Synthesize
         JWorldModule jwm = new JWorldModule();
-        jwm.setSampleRate(sample_rate);
+        jwm.setSampleRate(22050);
         jwm.setFramePeriod(frame_period);
         Utterance utt_enriched = jwm.process(utt);
+
+        // Validate
+        AudioItem au_it = (AudioItem) utt_enriched.getSequence(SupportedSequenceType.AUDIO).get(0);
+        AudioInputStream ais = au_it.getAudioStream();
+
+        // Load reference
+        URL url = JWorldTest.class.getResource("/vaiueo2d_rec.wav");
+        AudioInputStream ref_ais = AudioSystem.getAudioInputStream(url);
+
+        // Assert equality
+        AudioFormat format = ais.getFormat();
+        byte[] rend_bytes = new byte[(int) (ais.getFrameLength() * format.getFrameSize())];
+        ais.read(rend_bytes);
+        ByteBuffer buf = ByteBuffer.wrap(rend_bytes);
+        short[] rend_short = new short[buf.asShortBuffer().remaining()];
+        buf.asShortBuffer().get(rend_short);
+
+        format = ref_ais.getFormat();
+        byte[] ref_bytes = new byte[(int) (ref_ais.getFrameLength() * format.getFrameSize())];
+        ref_ais.read(ref_bytes);
+        buf = ByteBuffer.wrap(ref_bytes);
+        short[] ref_short = new short[buf.asShortBuffer().remaining()];
+        buf.asShortBuffer().get(ref_short);
+
+        Assert.assertEquals(ref_short.length, rend_short.length);
+        for (int s=0; s<ref_short.length; s++) {
+            Assert.assertEquals(ref_short[s], rend_short[s], 0);
+        }
     }
 }

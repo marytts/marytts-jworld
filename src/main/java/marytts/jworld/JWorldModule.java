@@ -28,14 +28,20 @@ import marytts.modules.MaryModule;
  */
 public class JWorldModule extends MaryModule
 {
+    private String f0_seq_label;
+
     private double frame_period;
     private int samplerate;
+    private boolean as_short;
+
 
     public JWorldModule()
     {
         super("acoustic");
         setFramePeriod(5.0);
         setSampleRate(48000);
+        setAsShort(false);
+        setF0SeqLabel(SupportedSequenceType.F0);
     }
 
     public void checkStartup() throws MaryConfigurationException
@@ -54,25 +60,25 @@ public class JWorldModule extends MaryModule
                                     JWorldSupportedSequenceType.APERIODICITY + "\"");
         }
 
-        if (! utt.hasSequence(SupportedSequenceType.F0)) {
-            throw new MaryException("Doesn't have the world dedicated f0 sequence \"" +
-                                    SupportedSequenceType.F0 + "\"");
-        }
+        // if (! utt.hasSequence(SupportedSequenceType.F0)) {
+        //     throw new MaryException("Doesn't have the world dedicated f0 sequence \"" +
+        //                             SupportedSequenceType.F0 + "\"");
+        // }
     }
 
     public Utterance process(Utterance utt, MaryConfiguration runtime_configuration) throws MaryException
     {
+        runtime_configuration.applyConfiguration(this);
 
         // FIXME: for now exception !
         if (utt.hasSequence(SupportedSequenceType.AUDIO)) {
             throw new MaryException("Audio sequence already existing");
         }
 
-
         // Get sequence
         Sequence<DoubleMatrixItem> sp_chunks = (Sequence<DoubleMatrixItem>) utt.getSequence(JWorldSupportedSequenceType.SPECTRUM);
         Sequence<DoubleMatrixItem> ap_chunks = (Sequence<DoubleMatrixItem>) utt.getSequence(JWorldSupportedSequenceType.APERIODICITY);
-        Sequence<F0List> f0_chunks = (Sequence<F0List>) utt.getSequence(SupportedSequenceType.F0);
+        Sequence<F0List> f0_chunks = (Sequence<F0List>) utt.getSequence(getF0SeqLabel());
 
         // Compute size
         int nb_frames = 0;
@@ -122,7 +128,7 @@ public class JWorldModule extends MaryModule
 
         // Achieve rendering
         JWorldWrapper jww = new JWorldWrapper(getSampleRate(), getFramePeriod());
-        AudioInputStream ais = jww.synthesis(f0, sp, ap);
+        AudioInputStream ais = jww.synthesis(f0, sp, ap, getAsShort());
 
         // Add audio to utterance
         AudioItem au_it = new AudioItem(ais);
@@ -136,7 +142,7 @@ public class JWorldModule extends MaryModule
             al_f0_audio.add(new IntegerPair(i, 0));
         }
         Relation rel_f0 = new Relation(f0_chunks, seq_audio, al_f0_audio);
-        utt.setRelation(SupportedSequenceType.F0, SupportedSequenceType.AUDIO, rel_f0);
+        utt.setRelation(getF0SeqLabel(), SupportedSequenceType.AUDIO, rel_f0);
 
         // Add Sectrum relation
         ArrayList<IntegerPair> al_sp_audio = new ArrayList<IntegerPair>();
@@ -164,6 +170,13 @@ public class JWorldModule extends MaryModule
     }
 
 
+    public String getF0SeqLabel() {
+        return f0_seq_label;
+    }
+
+    public void setF0SeqLabel(String f0_seq_label) {
+        this.f0_seq_label = f0_seq_label;
+    }
     public double getFramePeriod() {
         return frame_period;
     }
@@ -178,5 +191,14 @@ public class JWorldModule extends MaryModule
 
     public void setSampleRate(int samplerate) {
         this.samplerate = samplerate;
+    }
+
+
+    public boolean getAsShort() {
+        return as_short;
+    }
+
+    public void setAsShort(boolean as_short) {
+        this.as_short = as_short;
     }
 }
