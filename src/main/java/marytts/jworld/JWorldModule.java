@@ -198,7 +198,7 @@ public class JWorldModule extends MaryModule
         return as_short;
     }
 
-    public void setAsShort(boolean as_short) {
+    public void setAsShort(Boolean as_short) {
         this.as_short = as_short;
     }
 }
