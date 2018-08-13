@@ -37,7 +37,7 @@ test {
  ***********************************************************************************************/
 version '0.1-SNAPSHOT'
 group "de.dfki.mary"
-description "Artifact containing the world module module MaryTTS"
+description "Artifact containing the world module for MaryTTS"
 
 task sourceJar(type: Jar) {
     from sourceSets.main.allJava
