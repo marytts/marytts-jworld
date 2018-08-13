@@ -12,12 +12,17 @@ targetCompatibility = 1.8
 repositories {
     jcenter()
     maven {
+        "ojo"
         url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
+    }
+    maven {
+        name "marytts"
+        url  "https://dl.bintray.com/marytts/marytts"
     }
 }
 
 dependencies {
-    compile group: 'de.dfki.mary', name: 'jworld', version: '0.5-SNAPSHOT'
+    compile group: 'de.dfki.mary', name: 'jworld', version: '0.5'
     compile group: 'de.dfki.mary', name: 'marytts-common', version: '6.0.1-SNAPSHOT'
     testCompile group: 'org.testng', name: 'testng', version: '6.8.13'
 }
