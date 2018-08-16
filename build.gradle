@@ -16,11 +16,6 @@ repositories {
         url 'https://oss.jfrog.org/artifactory/oss-snapshot-local'
     }
     maven {
-        name "marytts"
-        url  "https://dl.bintray.com/marytts/marytts"
-    }
-
-    maven {
         url 'https://oss.jfrog.org/artifactory/oss-release-local'
     }
 }
