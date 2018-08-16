@@ -39,7 +39,7 @@ test {
 /**********************************************************************************************
  ** Project meta + publishing part
  ***********************************************************************************************/
-version '0.1-SNAPSHOT'
+version '0.1'
 group "de.dfki.mary"
 description "Artifact containing the world module for MaryTTS"
 
@@ -61,8 +61,9 @@ publishing {
             name 'projectLocal'
             url "$rootProject.buildDir/repo"
         }
+
         maven {
-            url version.endsWith('-SNAPSHOT') ? 'https://oss.jfrog.org/artifactory/oss-snapshot-local' : 'https://api.bintray.com/maven/marytts/marytts/marytts-jworld'
+            url version.endsWith('-SNAPSHOT') ? 'https://oss.jfrog.org/artifactory/oss-snapshot-local' : 'https://oss.jfrog.org/artifactory/oss-release-local'
             credentials {
                 username = findProperty('bintrayUser')
                 password = findProperty('bintrayApiKey')
